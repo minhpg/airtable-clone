@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+  db:
+    image: postgres:14.3-alpine
+    ports:
+      - target: 5432
+        published: 5432
+        protocol: tcp
+        mode: host
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: airtable-clone
+    volumes:
+      - ./dbrestore:/docker-entrypoint-initdb.d
+    restart: always

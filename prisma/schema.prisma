@@ -10,11 +10,81 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
+model Workspace {
+    id        String   @id @default(cuid())
+    name      String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    tables    Table[]
+
+    @@index([name])
+}
+
+model Table {
+    id        String   @id @default(cuid())
     name      String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
+    workspaceId  String
+    workspace    Workspace     @relation(fields: [workspaceId], references: [id])
+    tableRows    TableRow[]
+    tableColumns TableColumn[]
+    TableCell    TableCell[]
+
     @@index([name])
+}
+
+model TableRow {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    tableId    String
+    table      Table       @relation(fields: [tableId], references: [id])
+    tableCells TableCell[]
+
+    @@index([tableId])
+}
+
+enum TableCellType {
+    TEXT
+    NUMBER
+    BOOLEAN
+    DATE
+}
+
+model TableColumn {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    name String
+    type TableCellType
+
+    tableId String
+    table   Table       @relation(fields: [tableId], references: [id])
+    cells   TableCell[]
+
+    @@index([tableId])
+}
+
+model TableCell {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    tableRowId String
+    tableRow   TableRow @relation(fields: [tableRowId], references: [id])
+
+    tableColumnId String
+    tableColumn   TableColumn @relation(fields: [tableColumnId], references: [id])
+
+    tableId String
+    table   Table  @relation(fields: [tableId], references: [id])
+
+    value String?
+
+    @@unique([tableId, tableRowId, tableColumnId])
+    @@index([tableRowId])
 }
